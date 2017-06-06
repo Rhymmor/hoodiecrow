@@ -4,7 +4,9 @@
   "description": "Scriptable IMAP mock server for testing purposes",
   "main": "lib/server.js",
   "scripts": {
-    "test": "grunt"
+    "test": "grunt",
+    "build": "babel lib -d app",
+    "example": "node examples/complete-file.js"
   },
   "bin": {
     "hoodiecrow": "./bin/hoodiecrow"
@@ -22,6 +24,14 @@
     "simplesmtp": "~0.3.35"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.5.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "grunt": "~0.4.5",
     "grunt-contrib-jshint": "~0.12.0",
     "grunt-contrib-nodeunit": "~0.4.1",
