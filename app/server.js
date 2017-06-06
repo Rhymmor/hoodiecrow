@@ -1,8 +1,16 @@
+"use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 require("babel-core/register");
 require("babel-polyfill");
 "use strict";
 
-process.on('warning', e => console.warn(e.stack));
+process.on('warning', function (e) {
+    return console.warn(e.stack);
+});
 
 var Stream = require("stream").Stream;
 var util = require("util");
@@ -12,7 +20,7 @@ var fs = require("fs");
 var imapHandler = require("imap-handler");
 //var starttls = require("./starttls");
 
-module.exports = function(options) {
+module.exports = function (options) {
     return new IMAPServer(options);
 };
 
@@ -55,8 +63,8 @@ function IMAPServer(options) {
         }
     };
 
-    [].concat(this.options.plugins || []).forEach((function(plugin) {
-        switch (typeof plugin) {
+    [].concat(this.options.plugins || []).forEach(function (plugin) {
+        switch (typeof plugin === "undefined" ? "undefined" : _typeof(plugin)) {
             case "string":
                 require("./plugins/" + plugin.toLowerCase())(this);
                 break;
@@ -64,7 +72,7 @@ function IMAPServer(options) {
                 plugin(this);
                 break;
         }
-    }).bind(this));
+    }.bind(this));
 
     this.systemFlags = [].concat(this.options.systemFlags || ["\\Answered", "\\Flagged", "\\Draft", "\\Deleted", "\\Seen"]);
     this.storage = this.options.storage || {
@@ -84,29 +92,29 @@ function IMAPServer(options) {
 }
 util.inherits(IMAPServer, Stream);
 
-IMAPServer.prototype.listen = function() {
+IMAPServer.prototype.listen = function () {
     var args = Array.prototype.slice.call(arguments);
     this.server.listen.apply(this.server, args);
 };
 
-IMAPServer.prototype.close = function(callback) {
+IMAPServer.prototype.close = function (callback) {
     this.server.close(callback);
 };
 
-IMAPServer.prototype.createClient = function(socket) {
+IMAPServer.prototype.createClient = function (socket) {
     var connection = new IMAPConnection(this, socket);
-    this.connectionHandlers.forEach((function(handler) {
+    this.connectionHandlers.forEach(function (handler) {
         handler(connection);
-    }).bind(this));
+    }.bind(this));
 };
 
-IMAPServer.prototype.registerCapability = function(keyword, handler) {
-    this.capabilities[keyword] = handler || function() {
+IMAPServer.prototype.registerCapability = function (keyword, handler) {
+    this.capabilities[keyword] = handler || function () {
         return true;
     };
 };
 
-IMAPServer.prototype.setCommandHandler = function(command, handler) {
+IMAPServer.prototype.setCommandHandler = function (command, handler) {
     command = (command || "").toString().toUpperCase();
     this.commandHandlers[command] = handler;
 };
@@ -117,7 +125,7 @@ IMAPServer.prototype.setCommandHandler = function(command, handler) {
  * @param {String} path Pathname for the mailbox
  * @return {Object} mailbox object or undefined
  */
-IMAPServer.prototype.getMailbox = function(path) {
+IMAPServer.prototype.getMailbox = function (path) {
     if (path.toUpperCase() === "INBOX") {
         return this.folderCache.INBOX;
     }
@@ -131,7 +139,7 @@ IMAPServer.prototype.getMailbox = function(path) {
  * @param {Object|String} mailbox Mailbox the message is related to
  * @param {Object} ignoreConnection if set the selected connection ignores this notification
  */
-IMAPServer.prototype.notify = function(command, mailbox, ignoreConnection) {
+IMAPServer.prototype.notify = function (command, mailbox, ignoreConnection) {
     command.notification = true;
     this.emit("notify", {
         command: command,
@@ -147,7 +155,7 @@ IMAPServer.prototype.notify = function(command, mailbox, ignoreConnection) {
  * @param {String} command Command name
  * @return {Function} handler for the specified command
  */
-IMAPServer.prototype.getCommandHandler = function(command) {
+IMAPServer.prototype.getCommandHandler = function (command) {
     command = (command || "").toString().toUpperCase();
 
     var handler;
@@ -170,7 +178,7 @@ IMAPServer.prototype.getCommandHandler = function(command) {
  *
  * @param {Object|String} mailbox Mailbox object or path
  */
-IMAPServer.prototype.getStatus = function(mailbox) {
+IMAPServer.prototype.getStatus = function (mailbox) {
     if (typeof mailbox === "string") {
         mailbox = this.getMailbox(mailbox);
     }
@@ -183,7 +191,7 @@ IMAPServer.prototype.getStatus = function(mailbox) {
         unseen = 0,
         permanentFlags = [].concat(mailbox.permanentFlags || []);
 
-    mailbox.messages.forEach((function(message) {
+    mailbox.messages.forEach(function (message) {
 
         if (message.flags.indexOf("\\Seen") < 0) {
             unseen++;
@@ -191,19 +199,18 @@ IMAPServer.prototype.getStatus = function(mailbox) {
             seen++;
         }
 
-        message.flags.forEach((function(flag) {
+        message.flags.forEach(function (flag) {
             if (!flags[flag]) {
                 flags[flag] = 1;
             } else {
-                flags[flag] ++;
+                flags[flag]++;
             }
 
             if (permanentFlags.indexOf(flag) < 0) {
                 permanentFlags.push(flag);
             }
-        }).bind(this));
-
-    }).bind(this));
+        }.bind(this));
+    }.bind(this));
 
     return {
         flags: flags,
@@ -219,7 +226,7 @@ IMAPServer.prototype.getStatus = function(mailbox) {
  * @param {String} date Date value to be validated
  * @return {Boolean} Returns true if the date string is in IMAP date-time format
  */
-IMAPServer.prototype.validateInternalDate = function(date) {
+IMAPServer.prototype.validateInternalDate = function (date) {
     if (!date || typeof date !== "string") {
         return false;
     }
@@ -232,11 +239,9 @@ IMAPServer.prototype.validateInternalDate = function(date) {
  * @param {Object} date Date object to be converted
  * @return {String} Returns a valid date-time formatted string
  */
-IMAPServer.prototype.formatInternalDate = function(date) {
+IMAPServer.prototype.formatInternalDate = function (date) {
     var day = date.getDate(),
-        month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        ][date.getMonth()],
+        month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getMonth()],
         year = date.getFullYear(),
         hour = date.getHours(),
         minute = date.getMinutes(),
@@ -245,11 +250,7 @@ IMAPServer.prototype.formatInternalDate = function(date) {
         tzHours = Math.abs(Math.floor(tz / 60)),
         tzMins = Math.abs(tz) - tzHours * 60;
 
-    return (day < 10 ? "0" : "") + day + "-" + month + "-" + year + " " +
-        (hour < 10 ? "0" : "") + hour + ":" + (minute < 10 ? "0" : "") +
-        minute + ":" + (second < 10 ? "0" : "") + second + " " +
-        (tz > 0 ? "-" : "+") + (tzHours < 10 ? "0" : "") + tzHours +
-        (tzMins < 10 ? "0" : "") + tzMins;
+    return (day < 10 ? "0" : "") + day + "-" + month + "-" + year + " " + (hour < 10 ? "0" : "") + hour + ":" + (minute < 10 ? "0" : "") + minute + ":" + (second < 10 ? "0" : "") + second + " " + (tz > 0 ? "-" : "+") + (tzHours < 10 ? "0" : "") + tzHours + (tzMins < 10 ? "0" : "") + tzMins;
 };
 
 /**
@@ -258,7 +259,7 @@ IMAPServer.prototype.formatInternalDate = function(date) {
  * @param {String} path Pathname for the mailbox
  * @param {Object} [defaultMailbox] use this object as the mailbox to add instead of empty'
  */
-IMAPServer.prototype.createMailbox = function(path, defaultMailbox) {
+IMAPServer.prototype.createMailbox = function (path, defaultMailbox) {
     // Ensure case insensitive INBOX
     if (path.toUpperCase() === "INBOX") {
         throw new Error("INBOX can not be modified");
@@ -269,7 +270,7 @@ IMAPServer.prototype.createMailbox = function(path, defaultMailbox) {
         storage,
         folderPath;
 
-    Object.keys(this.storage).forEach((function(key) {
+    Object.keys(this.storage).forEach(function (key) {
         if (key === "INBOX") {
             // Ignore INBOX
             return;
@@ -283,7 +284,7 @@ IMAPServer.prototype.createMailbox = function(path, defaultMailbox) {
         } else if (!namespace && !key && this.storage[key].type === "personal") {
             namespace = key;
         }
-    }).bind(this));
+    }.bind(this));
 
     if (!this.storage[namespace]) {
         throw new Error("Unknown namespace");
@@ -314,7 +315,7 @@ IMAPServer.prototype.createMailbox = function(path, defaultMailbox) {
         curPath = curPath.substr(0, curPath.length - storage.separator.length);
     }
 
-    folderPath.forEach((function(folderName) {
+    folderPath.forEach(function (folderName) {
         curPath += (curPath.length ? storage.separator : "") + folderName;
 
         var folder = this.getMailbox(curPath) || false;
@@ -357,7 +358,7 @@ IMAPServer.prototype.createMailbox = function(path, defaultMailbox) {
         }
 
         parent = folder;
-    }).bind(this));
+    }.bind(this));
 };
 
 /**
@@ -366,7 +367,7 @@ IMAPServer.prototype.createMailbox = function(path, defaultMailbox) {
  * @param {String} path Pathname for the mailbox
  * @param {boolean} keepContents If true do not delete messages
  */
-IMAPServer.prototype.deleteMailbox = function(path, keepContents) {
+IMAPServer.prototype.deleteMailbox = function (path, keepContents) {
     // Ensure case insensitive INBOX
     if (path.toUpperCase() === "INBOX") {
         throw new Error("INBOX can not be modified");
@@ -381,7 +382,7 @@ IMAPServer.prototype.deleteMailbox = function(path, keepContents) {
         parent,
         parentKey;
 
-    Object.keys(this.storage).forEach((function(key) {
+    Object.keys(this.storage).forEach(function (key) {
         if (key === "INBOX") {
             // Ignore INBOX
             return;
@@ -395,7 +396,7 @@ IMAPServer.prototype.deleteMailbox = function(path, keepContents) {
         } else if (!namespace && !key && this.storage[key].type === "personal") {
             namespace = key;
         }
-    }).bind(this));
+    }.bind(this));
 
     if (!this.storage[namespace]) {
         throw new Error("Unknown namespace");
@@ -412,9 +413,7 @@ IMAPServer.prototype.deleteMailbox = function(path, keepContents) {
 
         mailbox = this.folderCache[folderPath];
 
-        if (!mailbox || (
-                mailbox.flags.indexOf("\\Noselect") >= 0 &&
-                Object.keys(mailbox.folders || {}).length)) {
+        if (!mailbox || mailbox.flags.indexOf("\\Noselect") >= 0 && Object.keys(mailbox.folders || {}).length) {
             throw new Error("Mailbox does not exist");
         }
 
@@ -432,7 +431,7 @@ IMAPServer.prototype.deleteMailbox = function(path, keepContents) {
             var reference = mailbox,
                 folder = {};
 
-            Object.keys(reference).forEach(function(key) {
+            Object.keys(reference).forEach(function (key) {
                 if (key !== "messages") {
                     folder[key] = reference[key];
                 } else {
@@ -448,9 +447,7 @@ IMAPServer.prototype.deleteMailbox = function(path, keepContents) {
             delete parent.folders[folderName];
 
             if (parent !== storage) {
-                if (parent.flags.indexOf("\\Noselect") >= 0 &&
-                    !Object.keys(parent.folders || {}).length
-                ) {
+                if (parent.flags.indexOf("\\Noselect") >= 0 && !Object.keys(parent.folders || {}).length) {
                     this.deleteMailbox(parent.path);
                 } else {
                     this.toggleFlags(parent.flags, ["\\HasNoChildren", "\\HasChildren"], Object.keys(parent.folders || {}).length ? 1 : 0);
@@ -467,15 +464,15 @@ IMAPServer.prototype.deleteMailbox = function(path, keepContents) {
 /**
  * INBOX has its own namespace
  */
-IMAPServer.prototype.indexFolders = function() {
+IMAPServer.prototype.indexFolders = function () {
     var folders = {};
 
-    var walkTree = (function(path, separator, branch, namespace) {
+    var walkTree = function (path, separator, branch, namespace) {
         var keyObj = namespace === "INBOX" ? {
             INBOX: true
         } : branch;
 
-        Object.keys(keyObj).forEach((function(key) {
+        Object.keys(keyObj).forEach(function (key) {
 
             var curBranch = branch[key],
                 curPath = (path ? path + (path.substr(-1) !== separator ? separator : "") : "") + key;
@@ -484,7 +481,7 @@ IMAPServer.prototype.indexFolders = function() {
             this.processMailbox(curPath, curBranch, namespace);
 
             // ensure uid, flags and internaldate for every message
-            curBranch.messages.forEach((function(message, i) {
+            curBranch.messages.forEach(function (message, i) {
 
                 // If the input was a raw message, convert it to an object
                 if (typeof message === "string") {
@@ -494,21 +491,20 @@ IMAPServer.prototype.indexFolders = function() {
                 }
 
                 this.processMessage(message, curBranch);
-            }).bind(this));
+            }.bind(this));
 
             if (namespace !== "INBOX" && curBranch.folders && Object.keys(curBranch.folders).length) {
                 walkTree(curPath, separator, curBranch.folders, namespace);
             }
-
-        }).bind(this));
-    }).bind(this);
+        }.bind(this));
+    }.bind(this);
 
     // Ensure INBOX namespace always exists
     if (!this.storage.INBOX) {
         this.storage.INBOX = {};
     }
 
-    Object.keys(this.storage).forEach((function(key) {
+    Object.keys(this.storage).forEach(function (key) {
         if (key === "INBOX") {
             walkTree("", "/", this.storage, "INBOX");
         } else {
@@ -522,7 +518,7 @@ IMAPServer.prototype.indexFolders = function() {
 
             walkTree(key, this.storage[key].separator, this.storage[key].folders, key);
         }
-    }).bind(this));
+    }.bind(this));
 
     if (!this.referenceNamespace) {
         this.storage[""] = this.storage[""] || {};
@@ -537,14 +533,13 @@ IMAPServer.prototype.indexFolders = function() {
     }
 
     if (this.referenceNamespace.substr(0, this.referenceNamespace.length - this.storage[this.referenceNamespace].separator.length).toUpperCase === "INBOX") {
-        this.toggleFlags(this.storage.INBOX.flags, ["\\HasChildren", "\\HasNoChildren"],
-            this.storage[this.referenceNamespace].folders && Object.keys(this.storage[this.referenceNamespace].folders).length ? 0 : 1);
+        this.toggleFlags(this.storage.INBOX.flags, ["\\HasChildren", "\\HasNoChildren"], this.storage[this.referenceNamespace].folders && Object.keys(this.storage[this.referenceNamespace].folders).length ? 0 : 1);
     }
 
     this.folderCache = folders;
 };
 
-IMAPServer.prototype.processMailbox = function(path, mailbox, namespace) {
+IMAPServer.prototype.processMailbox = function (path, mailbox, namespace) {
     mailbox.path = path;
 
     mailbox.namespace = namespace;
@@ -560,12 +555,11 @@ IMAPServer.prototype.processMailbox = function(path, mailbox, namespace) {
     mailbox.messages = [].concat(mailbox.messages || []);
 
     // ensure highest uidnext
-    mailbox.uidnext = Math.max.apply(Math, [mailbox.uidnext || 1].concat(mailbox.messages.map(function(message) {
+    mailbox.uidnext = Math.max.apply(Math, [mailbox.uidnext || 1].concat(mailbox.messages.map(function (message) {
         return (message.uid || 0) + 1;
     })));
 
-    this.toggleFlags(mailbox.flags, ["\\HasChildren", "\\HasNoChildren"],
-        mailbox.folders && Object.keys(mailbox.folders).length ? 0 : 1);
+    this.toggleFlags(mailbox.flags, ["\\HasChildren", "\\HasNoChildren"], mailbox.folders && Object.keys(mailbox.folders).length ? 0 : 1);
 };
 
 /**
@@ -576,14 +570,14 @@ IMAPServer.prototype.processMailbox = function(path, mailbox, namespace) {
  * @param {Array} checkFlags Flags to toggle
  * @param {Number} value Flag from checkFlags array with value index is toggled
  */
-IMAPServer.prototype.toggleFlags = function(flags, checkFlags, value) {
-    [].concat(checkFlags || []).forEach((function(flag, i) {
+IMAPServer.prototype.toggleFlags = function (flags, checkFlags, value) {
+    [].concat(checkFlags || []).forEach(function (flag, i) {
         if (i === value) {
             this.ensureFlag(flags, flag);
         } else {
             this.removeFlag(flags, flag);
         }
-    }).bind(this));
+    }.bind(this));
 };
 
 /**
@@ -592,7 +586,7 @@ IMAPServer.prototype.toggleFlags = function(flags, checkFlags, value) {
  * @param {Array} flags An array of flags to check
  * @param {String} flag If the flag is missing, add it
  */
-IMAPServer.prototype.ensureFlag = function(flags, flag) {
+IMAPServer.prototype.ensureFlag = function (flags, flag) {
     if (flags.indexOf(flag) < 0) {
         flags.push(flag);
     }
@@ -604,7 +598,7 @@ IMAPServer.prototype.ensureFlag = function(flags, flag) {
  * @param {Array} flags An array of flags to check
  * @param {String} flag If the flag is in the list, remove it
  */
-IMAPServer.prototype.removeFlag = function(flags, flag) {
+IMAPServer.prototype.removeFlag = function (flags, flag) {
     var i;
     if (flags.indexOf(flag) >= 0) {
         for (i = flags.length - 1; i >= 0; i--) {
@@ -615,7 +609,7 @@ IMAPServer.prototype.removeFlag = function(flags, flag) {
     }
 };
 
-IMAPServer.prototype.processMessage = function(message, mailbox) {
+IMAPServer.prototype.processMessage = function (message, mailbox) {
     // internaldate should always be a Date object
     message.internaldate = message.internaldate || new Date();
     if (Object.prototype.toString.call(message.internaldate) === "[object Date]") {
@@ -625,9 +619,9 @@ IMAPServer.prototype.processMessage = function(message, mailbox) {
     message.uid = message.uid || mailbox.uidnext++;
 
     // Allow plugins to process messages
-    this.messageHandlers.forEach((function(handler) {
+    this.messageHandlers.forEach(function (handler) {
         handler(this, message, mailbox);
-    }).bind(this));
+    }.bind(this));
 };
 
 /**
@@ -640,7 +634,7 @@ IMAPServer.prototype.processMessage = function(message, mailbox) {
  * @param {Object} [ignoreConnection] To not advertise new message to selected connection
  * @return An object of the form { mailbox, message }
  */
-IMAPServer.prototype.appendMessage = function(mailbox, flags, internaldate, raw, ignoreConnection) {
+IMAPServer.prototype.appendMessage = function (mailbox, flags, internaldate, raw, ignoreConnection) {
     if (typeof mailbox === "string") {
         mailbox = this.getMailbox(mailbox);
     }
@@ -656,18 +650,16 @@ IMAPServer.prototype.appendMessage = function(mailbox, flags, internaldate, raw,
 
     this.notify({
         tag: "*",
-        attributes: [
-            mailbox.messages.length, {
-                type: "ATOM",
-                value: "EXISTS"
-            }
-        ]
+        attributes: [mailbox.messages.length, {
+            type: "ATOM",
+            value: "EXISTS"
+        }]
     }, mailbox, ignoreConnection);
 
     return { mailbox: mailbox, message: message };
 };
 
-IMAPServer.prototype.matchFolders = function(reference, match) {
+IMAPServer.prototype.matchFolders = function (reference, match) {
     var includeINBOX = false;
 
     if (reference === "" && this.referenceNamespace !== false) {
@@ -684,10 +676,8 @@ IMAPServer.prototype.matchFolders = function(reference, match) {
         result = [];
 
     var query = new RegExp("^" + lookup.
-        // escape regex symbols
-        replace(/([\\^$+?!.():=\[\]|,\-])/g, "\\$1").replace(/[*]/g, ".*").replace(/[%]/g, "[^" + (namespace.separator.replace(/([\\^$+*?!.():=\[\]|,\-])/g, "\\$1")) + "]*") +
-        "$",
-        "");
+    // escape regex symbols
+    replace(/([\\^$+?!.():=\[\]|,\-])/g, "\\$1").replace(/[*]/g, ".*").replace(/[%]/g, "[^" + namespace.separator.replace(/([\\^$+*?!.():=\[\]|,\-])/g, "\\$1") + "]*") + "$", "");
 
     if (includeINBOX && ((reference ? reference + namespace.separator : "") + "INBOX").match(query)) {
         result.push(this.folderCache.INBOX);
@@ -697,13 +687,11 @@ IMAPServer.prototype.matchFolders = function(reference, match) {
         reference = this.referenceNamespace;
     }
 
-    Object.keys(this.folderCache).forEach((function(path) {
-        if (path.match(query) &&
-            (this.folderCache[path].flags.indexOf("\\NonExistent") < 0 || this.folderCache[path].path === match) &&
-            this.folderCache[path].namespace === reference) {
+    Object.keys(this.folderCache).forEach(function (path) {
+        if (path.match(query) && (this.folderCache[path].flags.indexOf("\\NonExistent") < 0 || this.folderCache[path].path === match) && this.folderCache[path].namespace === reference) {
             result.push(this.folderCache[path]);
         }
-    }).bind(this));
+    }.bind(this));
 
     return result;
 };
@@ -716,7 +704,7 @@ IMAPServer.prototype.matchFolders = function(reference, match) {
  * @param {Boolean} isUid If true, use UID values, not sequence indexes for comparison
  * @return {Array} An array of messages in the form of [[seqIndex, message]]
  */
-IMAPServer.prototype.getMessageRange = function(mailbox, range, isUid) {
+IMAPServer.prototype.getMessageRange = function (mailbox, range, isUid) {
     range = (range || "").toString();
     if (typeof mailbox === "string") {
         mailbox = this.getMailbox(mailbox);
@@ -728,28 +716,27 @@ IMAPServer.prototype.getMessageRange = function(mailbox, range, isUid) {
         uid,
         totalMessages = messages.length,
         maxUid = 0,
-
-        inRange = function(nr, ranges, total) {
-            var range, from, to;
-            for (var i = 0, len = ranges.length; i < len; i++) {
-                range = ranges[i];
-                to = range.split(":");
-                from = to.shift();
-                if (from === "*") {
-                    from = total;
-                }
-                from = Number(from) || 1;
-                to = to.pop() || from;
-                to = Number(to === "*" && total || to) || from;
-
-                if (nr >= Math.min(from, to) && nr <= Math.max(from, to)) {
-                    return true;
-                }
+        inRange = function inRange(nr, ranges, total) {
+        var range, from, to;
+        for (var i = 0, len = ranges.length; i < len; i++) {
+            range = ranges[i];
+            to = range.split(":");
+            from = to.shift();
+            if (from === "*") {
+                from = total;
             }
-            return false;
-        };
+            from = Number(from) || 1;
+            to = to.pop() || from;
+            to = Number(to === "*" && total || to) || from;
 
-    messages.forEach(function(message) {
+            if (nr >= Math.min(from, to) && nr <= Math.max(from, to)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    messages.forEach(function (message) {
         if (message.uid > maxUid) {
             maxUid = message.uid;
         }
@@ -799,7 +786,7 @@ function IMAPConnection(server, socket) {
     this.socket.write("* OK Hoodiecrow ready for rumble\r\n");
 }
 
-IMAPConnection.prototype.onClose = function() {
+IMAPConnection.prototype.onClose = function () {
     this.socket.removeAllListeners();
     this.socket = null;
     try {
@@ -808,7 +795,7 @@ IMAPConnection.prototype.onClose = function() {
     this.server.removeListener("notify", this._notificationCallback);
 };
 
-IMAPConnection.prototype.onError = function(err) {
+IMAPConnection.prototype.onError = function (err) {
     if (this.options.debug) {
         console.log("Socket error event emitted, %s", Date());
         console.log(err);
@@ -818,7 +805,7 @@ IMAPConnection.prototype.onError = function(err) {
     } catch (E) {}
 };
 
-IMAPConnection.prototype.onData = function(chunk) {
+IMAPConnection.prototype.onData = function (chunk) {
     var match, str;
 
     str = (chunk || "").toString("binary");
@@ -835,7 +822,7 @@ IMAPConnection.prototype.onData = function(chunk) {
     }
 
     this._remainder = str = this._remainder + str;
-    while ((match = str.match(/(\{(\d+)(\+)?\})?\r?\n/))) {
+    while (match = str.match(/(\{(\d+)(\+)?\})?\r?\n/)) {
         if (!match[2]) {
 
             if (this.inputHandler) {
@@ -873,15 +860,11 @@ IMAPConnection.prototype.onData = function(chunk) {
     }
 };
 
-IMAPConnection.prototype.onNotify = function(notification) {
+IMAPConnection.prototype.onNotify = function (notification) {
     if (notification.ignoreConnection === this) {
         return;
     }
-    if (!notification.mailbox ||
-        (this.selectedMailbox &&
-            this.selectedMailbox === (
-                typeof notification.mailbox === "string" &&
-                this.getMailbox(notification.mailbox) || notification.mailbox))) {
+    if (!notification.mailbox || this.selectedMailbox && this.selectedMailbox === (typeof notification.mailbox === "string" && this.getMailbox(notification.mailbox) || notification.mailbox)) {
         this.notificationQueue.push(notification.command);
         if (this.directNotifications) {
             this.processNotifications();
@@ -889,7 +872,7 @@ IMAPConnection.prototype.onNotify = function(notification) {
     }
 };
 
-IMAPConnection.prototype.upgradeConnection = function(callback) {
+IMAPConnection.prototype.upgradeConnection = function (callback) {
     this.upgrading = true;
 
     this.options.credentials.ciphers = this.options.credentials.ciphers || "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS";
@@ -904,7 +887,7 @@ IMAPConnection.prototype.upgradeConnection = function(callback) {
         server: this.server.server,
 
         // throws if SNICallback is missing, so we set a default callback
-        SNICallback: function(servername, cb) {
+        SNICallback: function SNICallback(servername, cb) {
             cb(null, secureContext);
         }
     };
@@ -920,7 +903,7 @@ IMAPConnection.prototype.upgradeConnection = function(callback) {
     secureSocket.on("error", this.onError.bind(this));
     secureSocket.on("clientError", this.onError.bind(this));
 
-    secureSocket.on("secure", function() {
+    secureSocket.on("secure", function () {
         this.secureConnection = true;
         this.socket = secureSocket;
         this.upgrading = false;
@@ -929,7 +912,7 @@ IMAPConnection.prototype.upgradeConnection = function(callback) {
     }.bind(this));
 };
 
-IMAPConnection.prototype.processNotifications = function(data) {
+IMAPConnection.prototype.processNotifications = function (data) {
     var notification;
     for (var i = 0; i < this.notificationQueue.length; i++) {
         notification = this.notificationQueue[i];
@@ -963,23 +946,26 @@ IMAPConnection.prototype.processNotifications = function(data) {
  *   example, the STORE command will pass the impacted message for each updated
  *   FETCH result.  (This may have other names when used, like "affected".)
  */
-IMAPConnection.prototype.send = function(response, description, parsed) {
-    return new Promise((resolve, reject) => {
-        if (!this.socket || this.socket.destroyed) {
+IMAPConnection.prototype.send = function (response, description, parsed) {
+    var _this = this,
+        _arguments = arguments;
+
+    return new Promise(function (resolve, reject) {
+        if (!_this.socket || _this.socket.destroyed) {
             resolve();
         }
 
         if (!response.notification && response.tag !== "*") {
             // arguments[2] should be the original command
-            this.processNotifications(parsed);
+            _this.processNotifications(parsed);
         } else {
             // override values etc.
         }
 
-        var args = Array.prototype.slice.call(arguments);
-        this.server.outputHandlers.forEach((function(handler) {
+        var args = Array.prototype.slice.call(_arguments);
+        _this.server.outputHandlers.forEach(function (handler) {
             handler.apply(null, [this].concat(args));
-        }).bind(this));
+        }.bind(_this));
 
         // No need to display this response to user
         if (response.skipResponse) {
@@ -989,121 +975,187 @@ IMAPConnection.prototype.send = function(response, description, parsed) {
         if (!response.files) {
             var compiled = imapHandler.compiler(response);
 
-            if (this.options.debug) {
+            if (_this.options.debug) {
                 console.log("SEND: %s", compiled);
             }
 
-            if (this.socket && !this.socket.destroyed) {
-                this.socket.write(new Buffer(compiled + "\r\n", "binary"));
+            if (_this.socket && !_this.socket.destroyed) {
+                _this.socket.write(new Buffer(compiled + "\r\n", "binary"));
                 resolve();
             }
             reject();
-        }
-        else {
+        } else {
             console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
-            if (this.socket && !this.socket.destroyed) {
-                const rs = fs.createReadStream(response.files[0], 'utf8');
-                rs.on('data', chunk => {
+            if (_this.socket && !_this.socket.destroyed) {
+                var rs = fs.createReadStream(response.files[0], 'utf8');
+                rs.on('data', function (chunk) {
                     console.log(chunk);
-                    this.socket.write(chunk)
+                    _this.socket.write(chunk);
                 });
-                rs.on('end', () => resolve());
+                rs.on('end', function () {
+                    return resolve();
+                });
                 //rs.pipe(process.stdout);
                 //rs.pipe(this.socket);
             }
         }
-    })
+    });
 };
 
-IMAPConnection.prototype.scheduleCommand = async function(data) {
-    var parsed,
-        tag = (data.match(/\s*([^\s]+)/) || [])[1] || "*";
+IMAPConnection.prototype.scheduleCommand = function () {
+    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(data) {
+        var parsed, tag;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+            while (1) {
+                switch (_context.prev = _context.next) {
+                    case 0:
+                        tag = (data.match(/\s*([^\s]+)/) || [])[1] || "*";
+                        _context.prev = 1;
 
-    try {
-        parsed = imapHandler.parser(data, {
-            literalPlus: this.server.literalPlus
-        });
-    } catch (E) {
-        this.send({
-            tag: "*",
-            command: "BAD",
-            attributes: [{
-                type: "SECTION",
-                section: [{
-                    type: "ATOM",
-                    value: "SYNTAX"
-                }]
-            }, {
-                type: "TEXT",
-                value: E.message
-            }]
-        }, "ERROR MESSAGE", null, data, E);
+                        parsed = imapHandler.parser(data, {
+                            literalPlus: this.server.literalPlus
+                        });
+                        _context.next = 10;
+                        break;
 
-        this.send({
-            tag: tag,
-            command: "BAD",
-            attributes: [{
-                type: "TEXT",
-                value: "Error parsing command"
-            }]
-        }, "ERROR RESPONSE", null, data, E);
+                    case 5:
+                        _context.prev = 5;
+                        _context.t0 = _context["catch"](1);
 
-        return;
-    }
+                        this.send({
+                            tag: "*",
+                            command: "BAD",
+                            attributes: [{
+                                type: "SECTION",
+                                section: [{
+                                    type: "ATOM",
+                                    value: "SYNTAX"
+                                }]
+                            }, {
+                                type: "TEXT",
+                                value: _context.t0.message
+                            }]
+                        }, "ERROR MESSAGE", null, data, _context.t0);
 
-    if (this.server.getCommandHandler(parsed.command)) {
-        this._commandQueue.push({
-            parsed: parsed,
-            data: data
-        });
-        await this.processQueue();
-    } else {
-        this.send({
-            tag: parsed.tag,
-            command: "BAD",
-            attributes: [{
-                type: "TEXT",
-                value: "Invalid command " + parsed.command + ""
-            }]
-        }, "UNKNOWN COMMAND", parsed, data);
-    }
-};
+                        this.send({
+                            tag: tag,
+                            command: "BAD",
+                            attributes: [{
+                                type: "TEXT",
+                                value: "Error parsing command"
+                            }]
+                        }, "ERROR RESPONSE", null, data, _context.t0);
 
-IMAPConnection.prototype.processQueue = async function(force) {
-    var element;
+                        return _context.abrupt("return");
 
-    if (!force && this._processing) {
-        return;
-    }
+                    case 10:
+                        if (!this.server.getCommandHandler(parsed.command)) {
+                            _context.next = 16;
+                            break;
+                        }
 
-    if (!this._commandQueue.length) {
-        this._processing = false;
-        return;
-    }
+                        this._commandQueue.push({
+                            parsed: parsed,
+                            data: data
+                        });
+                        _context.next = 14;
+                        return this.processQueue();
 
-    this._processing = true;
+                    case 14:
+                        _context.next = 17;
+                        break;
 
-    element = this._commandQueue.shift();
-    try {
-        await this.server.getCommandHandler(element.parsed.command)(this, element.parsed, element.data, (function() {
-            if (!this._commandQueue.length) {
-                this._processing = false;
-            } else {
-                this.processQueue(true);
+                    case 16:
+                        this.send({
+                            tag: parsed.tag,
+                            command: "BAD",
+                            attributes: [{
+                                type: "TEXT",
+                                value: "Invalid command " + parsed.command + ""
+                            }]
+                        }, "UNKNOWN COMMAND", parsed, data);
+
+                    case 17:
+                    case "end":
+                        return _context.stop();
+                }
             }
-        }).bind(this));
-    } catch (ex) {
-      console.error("Error processing command:", ex, "\n", ex.stack);
-      this.send({
-          tag: element.parsed.tag,
-          command: "NO",
-          attributes: [{
-              type: "TEXT",
-              value: "Server error: " + ex + ""
-          }]
-      }, "SERVER ERROR", element.parsed, element.data);
-    }
-};
+        }, _callee, this, [[1, 5]]);
+    }));
+
+    return function (_x) {
+        return _ref.apply(this, arguments);
+    };
+}();
+
+IMAPConnection.prototype.processQueue = function () {
+    var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(force) {
+        var element;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+                switch (_context2.prev = _context2.next) {
+                    case 0:
+                        if (!(!force && this._processing)) {
+                            _context2.next = 2;
+                            break;
+                        }
+
+                        return _context2.abrupt("return");
+
+                    case 2:
+                        if (this._commandQueue.length) {
+                            _context2.next = 5;
+                            break;
+                        }
+
+                        this._processing = false;
+                        return _context2.abrupt("return");
+
+                    case 5:
+
+                        this._processing = true;
+
+                        element = this._commandQueue.shift();
+                        _context2.prev = 7;
+                        _context2.next = 10;
+                        return this.server.getCommandHandler(element.parsed.command)(this, element.parsed, element.data, function () {
+                            if (!this._commandQueue.length) {
+                                this._processing = false;
+                            } else {
+                                this.processQueue(true);
+                            }
+                        }.bind(this));
+
+                    case 10:
+                        _context2.next = 16;
+                        break;
+
+                    case 12:
+                        _context2.prev = 12;
+                        _context2.t0 = _context2["catch"](7);
+
+                        console.error("Error processing command:", _context2.t0, "\n", _context2.t0.stack);
+                        this.send({
+                            tag: element.parsed.tag,
+                            command: "NO",
+                            attributes: [{
+                                type: "TEXT",
+                                value: "Server error: " + _context2.t0 + ""
+                            }]
+                        }, "SERVER ERROR", element.parsed, element.data);
+
+                    case 16:
+                    case "end":
+                        return _context2.stop();
+                }
+            }
+        }, _callee2, this, [[7, 12]]);
+    }));
+
+    return function (_x2) {
+        return _ref2.apply(this, arguments);
+    };
+}();
 
 /**
  * Removes messages with \Deleted flag
@@ -1112,14 +1164,10 @@ IMAPConnection.prototype.processQueue = async function(force) {
  * @param {Boolean} [ignoreSelf] If set to true, does not send any notices to itself
  * @param {Boolean} [ignoreSelf] If set to true, does not send EXISTS notice to itself
  */
-IMAPConnection.prototype.expungeDeleted = function(mailbox, ignoreSelf, ignoreExists) {
-  this.expungeSpecificMessages(
-      mailbox,
-      function (message) {
+IMAPConnection.prototype.expungeDeleted = function (mailbox, ignoreSelf, ignoreExists) {
+    this.expungeSpecificMessages(mailbox, function (message) {
         return message.flags.indexOf("\\Deleted") >= 0;
-      },
-      ignoreSelf,
-      ignoreExists);
+    }, ignoreSelf, ignoreExists);
 };
 
 /**
@@ -1133,36 +1181,35 @@ IMAPConnection.prototype.expungeDeleted = function(mailbox, ignoreSelf, ignoreEx
  * @param {Boolean} [ignoreSelf] If set to true, does not send any notices to itself
  * @param {Boolean} [ignoreSelf] If set to true, does not send EXISTS notice to itself
  */
-IMAPConnection.prototype.expungeSpecificMessages = function(mailbox, messagesOrFilterFunc, ignoreSelf, ignoreExists) {
+IMAPConnection.prototype.expungeSpecificMessages = function (mailbox, messagesOrFilterFunc, ignoreSelf, ignoreExists) {
     var deleted = 0,
-        // old copy is required for those sessions that run FETCH before
-        // displaying the EXPUNGE notice
-        mailboxCopy = [].concat(mailbox.messages);
+
+    // old copy is required for those sessions that run FETCH before
+    // displaying the EXPUNGE notice
+    mailboxCopy = [].concat(mailbox.messages);
 
     var filterFunc;
     if (Array.isArray(messagesOrFilterFunc)) {
-      var messages = messagesOrFilterFunc;
-      filterFunc = function(message) {
-        return messages.indexOf(message) >= 0;
-      };
+        var messages = messagesOrFilterFunc;
+        filterFunc = function filterFunc(message) {
+            return messages.indexOf(message) >= 0;
+        };
     } else {
-      filterFunc = messagesOrFilterFunc;
+        filterFunc = messagesOrFilterFunc;
     }
 
     for (var i = 0; i < mailbox.messages.length; i++) {
-      var message = mailbox.messages[i];
+        var message = mailbox.messages[i];
         if (filterFunc(message)) {
             deleted++;
             mailbox.messages[i].ghost = true;
             mailbox.messages.splice(i, 1);
             this.server.notify({
                 tag: "*",
-                attributes: [
-                    i + 1, {
-                        type: "ATOM",
-                        value: "EXPUNGE"
-                    }
-                ]
+                attributes: [i + 1, {
+                    type: "ATOM",
+                    value: "EXPUNGE"
+                }]
             }, mailbox, ignoreSelf ? this : false);
             i--;
         }
@@ -1171,14 +1218,12 @@ IMAPConnection.prototype.expungeSpecificMessages = function(mailbox, messagesOrF
     if (deleted) {
         this.server.notify({
             tag: "*",
-            attributes: [
-                mailbox.messages.length, {
-                    type: "ATOM",
-                    value: "EXISTS"
-                }
-            ],
+            attributes: [mailbox.messages.length, {
+                type: "ATOM",
+                value: "EXISTS"
+            }],
             // distribute the old mailbox data with the notification
-            mailboxCopy: mailboxCopy,
+            mailboxCopy: mailboxCopy
         }, mailbox, ignoreSelf || ignoreExists ? this : false);
     }
 };

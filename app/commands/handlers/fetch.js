@@ -13,15 +13,14 @@ function prepareMessage(message) {
     if (!message.parsed) {
         message.parsed = mimeParser(message.raw);
     }
-
 }
 
-fetchHandlers.UID = function(connection, message) {
+fetchHandlers.UID = function (connection, message) {
     return message.uid;
 };
 
-fetchHandlers.FLAGS = function(connection, message) {
-    return message.flags.map(function(flag) {
+fetchHandlers.FLAGS = function (connection, message) {
+    return message.flags.map(function (flag) {
         return {
             type: "ATOM",
             value: flag
@@ -29,33 +28,31 @@ fetchHandlers.FLAGS = function(connection, message) {
     });
 };
 
-fetchHandlers.BODYSTRUCTURE = function(connection, message) {
-    prepareMessage(message)
-        .then(() => {
-            if (!message.parsed) {
-                message.parsed = mimeParser(message.raw);
-            }
-        })
-        .catch(console.log)
+fetchHandlers.BODYSTRUCTURE = function (connection, message) {
+    prepareMessage(message).then(function () {
+        if (!message.parsed) {
+            message.parsed = mimeParser(message.raw);
+        }
+    }).catch(console.log);
     return bodystructure(message.parsed, {
         upperCaseKeys: true,
         skipContentLocation: true
     });
 };
 
-fetchHandlers.ENVELOPE = function(connection, message) {
+fetchHandlers.ENVELOPE = function (connection, message) {
     prepareMessage(message);
     return envelope(message.parsed.parsedHeader);
 };
 
-fetchHandlers["BODY.PEEK"] = function(connection, message, query) {
+fetchHandlers["BODY.PEEK"] = function (connection, message, query) {
     if (!query.section) {
         throw new Error("BODY.PEEK requires ans argument list");
     }
     return fetchHandlers.BODY(connection, message, query);
 };
 
-fetchHandlers.BODY = function(connection, message, query) {
+fetchHandlers.BODY = function (connection, message, query) {
     var partial, start, length, key, path, context;
     prepareMessage(message);
 
@@ -74,7 +71,7 @@ fetchHandlers.BODY = function(connection, message, query) {
             throw new Error("Invalid BODY[<section>] identifier" + (query.section[0].value ? " " + query.section[0].type : ""));
         }
 
-        key = (query.section[0].value || "").replace(/^(\d+\.)*(\d$)?/g, function(pathStr) {
+        key = (query.section[0].value || "").replace(/^(\d+\.)*(\d$)?/g, function (pathStr) {
             path = pathStr.replace(/\.$/, "");
             return "";
         }).toUpperCase();
@@ -118,7 +115,7 @@ fetchHandlers.BODY = function(connection, message, query) {
                 }
                 value = "";
                 keyList = [];
-                query.section[1].forEach(function(queryKey) {
+                query.section[1].forEach(function (queryKey) {
                     if (["ATOM", "STRING", "LITERAL"].indexOf(queryKey.type) < 0) {
                         throw new Error("Invalid header field name in list");
                     }
@@ -126,7 +123,7 @@ fetchHandlers.BODY = function(connection, message, query) {
                     keyList.push(queryKey.value.toUpperCase());
                 });
 
-                (context.header || []).forEach(function(line) {
+                (context.header || []).forEach(function (line) {
                     var parts = line.split(":"),
                         key = (parts.shift() || "").toUpperCase().trim();
                     if (keyList.indexOf(key) >= 0) {
@@ -143,7 +140,7 @@ fetchHandlers.BODY = function(connection, message, query) {
                 }
                 value = "";
                 keyList = [];
-                query.section[1].forEach(function(queryKey) {
+                query.section[1].forEach(function (queryKey) {
                     if (["ATOM", "STRING", "LITERAL"].indexOf(queryKey.type) < 0) {
                         throw new Error("Invalid header field name in list");
                     }
@@ -151,7 +148,7 @@ fetchHandlers.BODY = function(connection, message, query) {
                     keyList.push(queryKey.value.toUpperCase());
                 });
 
-                (context.header || []).forEach(function(line) {
+                (context.header || []).forEach(function (line) {
                     var parts = line.split(":"),
                         key = (parts.shift() || "").toUpperCase().trim();
                     if (keyList.indexOf(key) < 0) {
@@ -183,22 +180,22 @@ fetchHandlers.BODY = function(connection, message, query) {
     };
 };
 
-fetchHandlers.INTERNALDATE = function(connection, message) {
+fetchHandlers.INTERNALDATE = function (connection, message) {
     return message.internaldate;
 };
 
-fetchHandlers.RFC822 = function(connection, message) {
+fetchHandlers.RFC822 = function (connection, message) {
     return {
         type: "LITERAL",
         value: message.raw
     };
 };
 
-fetchHandlers["RFC822.SIZE"] = function(connection, message) {
+fetchHandlers["RFC822.SIZE"] = function (connection, message) {
     return message.raw.length;
 };
 
-fetchHandlers["RFC822.HEADER"] = function(connection, message) {
+fetchHandlers["RFC822.HEADER"] = function (connection, message) {
     prepareMessage(message);
     return {
         type: "LITERAL",
@@ -206,16 +203,15 @@ fetchHandlers["RFC822.HEADER"] = function(connection, message) {
     };
 };
 
-
 function resolveContext(source, path) {
     var pathNumbers = path.split("."),
         context = source,
         pathNumber,
         bodystruct = bodystructure(source, {
-            upperCaseKeys: true
-        });
+        upperCaseKeys: true
+    });
 
-    while ((pathNumber = pathNumbers.shift())) {
+    while (pathNumber = pathNumbers.shift()) {
         pathNumber = Number(pathNumber);
 
         // If RFC bodystructure begins with "MESSAGE" string, the bodystructure
