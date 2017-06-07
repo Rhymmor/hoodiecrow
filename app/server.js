@@ -928,6 +928,22 @@ IMAPConnection.prototype.processNotifications = function (data) {
     }
 };
 
+function readFile(filepath) {
+    return new Promise(function (resolve, reject) {
+        var data = '';
+        var rs = fs.createReadStream(filepath, 'utf8');
+        rs.on('data', function (chunk) {
+            return data += chunk;
+        });
+        rs.on('end', function () {
+            resolve(data);
+            rs.close();
+        });
+        rs.on('error', function (e) {
+            return reject(e);
+        });
+    });
+}
 /**
  * Compile a command object to a response string and write it to socket.
  * If the command object has a skipResponse property, the command is
@@ -950,77 +966,157 @@ IMAPConnection.prototype.send = function (response, description, parsed) {
     var _this = this,
         _arguments = arguments;
 
-    return new Promise(function (resolve, reject) {
-        if (!_this.socket || _this.socket.destroyed) {
-            resolve();
-        }
+    return new Promise(function () {
+        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(resolve, reject) {
+            var args, compiled, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, file;
 
-        if (!response.notification && response.tag !== "*") {
-            // arguments[2] should be the original command
-            _this.processNotifications(parsed);
-        } else {
-            // override values etc.
-        }
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            if (!_this.socket || _this.socket.destroyed) {
+                                resolve();
+                            }
 
-        var args = Array.prototype.slice.call(_arguments);
-        _this.server.outputHandlers.forEach(function (handler) {
-            handler.apply(null, [this].concat(args));
-        }.bind(_this));
+                            if (!response.notification && response.tag !== "*") {
+                                // arguments[2] should be the original command
+                                _this.processNotifications(parsed);
+                            } else {
+                                // override values etc.
+                            }
 
-        // No need to display this response to user
-        if (response.skipResponse) {
-            resolve();
-        }
+                            args = Array.prototype.slice.call(_arguments);
 
-        if (!response.files) {
-            var compiled = imapHandler.compiler(response);
+                            _this.server.outputHandlers.forEach(function (handler) {
+                                handler.apply(null, [this].concat(args));
+                            }.bind(_this));
 
-            if (_this.options.debug) {
-                console.log("SEND: %s", compiled);
-            }
+                            // No need to display this response to user
+                            if (response.skipResponse) {
+                                resolve();
+                            }
 
-            if (_this.socket && !_this.socket.destroyed) {
-                _this.socket.write(new Buffer(compiled + "\r\n", "binary"));
-                resolve();
-            }
-            reject();
-        } else {
-            console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
-            if (_this.socket && !_this.socket.destroyed) {
-                var rs = fs.createReadStream(response.files[0], 'utf8');
-                rs.on('data', function (chunk) {
-                    console.log(chunk);
-                    _this.socket.write(chunk);
-                });
-                rs.on('end', function () {
-                    return resolve();
-                });
-                //rs.pipe(process.stdout);
-                //rs.pipe(this.socket);
-            }
-        }
-    });
+                            compiled = imapHandler.compiler(response) || '';
+
+
+                            if (_this.options.debug) {
+                                console.log("SEND: %s", compiled);
+                            }
+
+                            console.log(process.cwd());
+
+                            if (!response.files) {
+                                _context.next = 42;
+                                break;
+                            }
+
+                            _iteratorNormalCompletion = true;
+                            _didIteratorError = false;
+                            _iteratorError = undefined;
+                            _context.prev = 12;
+                            _iterator = response.files[Symbol.iterator]();
+
+                        case 14:
+                            if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+                                _context.next = 28;
+                                break;
+                            }
+
+                            file = _step.value;
+                            _context.prev = 16;
+                            _context.next = 19;
+                            return readFile(file);
+
+                        case 19:
+                            compiled += _context.sent;
+                            _context.next = 25;
+                            break;
+
+                        case 22:
+                            _context.prev = 22;
+                            _context.t0 = _context["catch"](16);
+
+                            reject(_context.t0);
+
+                        case 25:
+                            _iteratorNormalCompletion = true;
+                            _context.next = 14;
+                            break;
+
+                        case 28:
+                            _context.next = 34;
+                            break;
+
+                        case 30:
+                            _context.prev = 30;
+                            _context.t1 = _context["catch"](12);
+                            _didIteratorError = true;
+                            _iteratorError = _context.t1;
+
+                        case 34:
+                            _context.prev = 34;
+                            _context.prev = 35;
+
+                            if (!_iteratorNormalCompletion && _iterator.return) {
+                                _iterator.return();
+                            }
+
+                        case 37:
+                            _context.prev = 37;
+
+                            if (!_didIteratorError) {
+                                _context.next = 40;
+                                break;
+                            }
+
+                            throw _iteratorError;
+
+                        case 40:
+                            return _context.finish(37);
+
+                        case 41:
+                            return _context.finish(34);
+
+                        case 42:
+                            if (_this.socket && !_this.socket.destroyed) {
+                                _this.socket.write(new Buffer(compiled + "\r\n", "binary"));
+                                resolve();
+                            }
+                            reject();
+
+                        case 44:
+                        case "end":
+                            return _context.stop();
+                    }
+                }
+            }, _callee, _this, [[12, 30, 34, 42], [16, 22], [35,, 37, 41]]);
+        }));
+
+        return function (_x, _x2) {
+            return _ref.apply(this, arguments);
+        };
+    }());
 };
 
 IMAPConnection.prototype.scheduleCommand = function () {
-    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(data) {
+    var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(data) {
         var parsed, tag;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
             while (1) {
-                switch (_context.prev = _context.next) {
+                switch (_context2.prev = _context2.next) {
                     case 0:
                         tag = (data.match(/\s*([^\s]+)/) || [])[1] || "*";
-                        _context.prev = 1;
+                        _context2.prev = 1;
 
                         parsed = imapHandler.parser(data, {
                             literalPlus: this.server.literalPlus
                         });
-                        _context.next = 10;
+                        _context2.next = 10;
                         break;
 
                     case 5:
-                        _context.prev = 5;
-                        _context.t0 = _context["catch"](1);
+                        _context2.prev = 5;
+                        _context2.t0 = _context2["catch"](1);
 
                         this.send({
                             tag: "*",
@@ -1033,9 +1129,9 @@ IMAPConnection.prototype.scheduleCommand = function () {
                                 }]
                             }, {
                                 type: "TEXT",
-                                value: _context.t0.message
+                                value: _context2.t0.message
                             }]
-                        }, "ERROR MESSAGE", null, data, _context.t0);
+                        }, "ERROR MESSAGE", null, data, _context2.t0);
 
                         this.send({
                             tag: tag,
@@ -1044,13 +1140,13 @@ IMAPConnection.prototype.scheduleCommand = function () {
                                 type: "TEXT",
                                 value: "Error parsing command"
                             }]
-                        }, "ERROR RESPONSE", null, data, _context.t0);
+                        }, "ERROR RESPONSE", null, data, _context2.t0);
 
-                        return _context.abrupt("return");
+                        return _context2.abrupt("return");
 
                     case 10:
                         if (!this.server.getCommandHandler(parsed.command)) {
-                            _context.next = 16;
+                            _context2.next = 16;
                             break;
                         }
 
@@ -1058,11 +1154,11 @@ IMAPConnection.prototype.scheduleCommand = function () {
                             parsed: parsed,
                             data: data
                         });
-                        _context.next = 14;
+                        _context2.next = 14;
                         return this.processQueue();
 
                     case 14:
-                        _context.next = 17;
+                        _context2.next = 17;
                         break;
 
                     case 16:
@@ -1077,47 +1173,47 @@ IMAPConnection.prototype.scheduleCommand = function () {
 
                     case 17:
                     case "end":
-                        return _context.stop();
+                        return _context2.stop();
                 }
             }
-        }, _callee, this, [[1, 5]]);
+        }, _callee2, this, [[1, 5]]);
     }));
 
-    return function (_x) {
-        return _ref.apply(this, arguments);
+    return function (_x3) {
+        return _ref2.apply(this, arguments);
     };
 }();
 
 IMAPConnection.prototype.processQueue = function () {
-    var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(force) {
+    var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(force) {
         var element;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
             while (1) {
-                switch (_context2.prev = _context2.next) {
+                switch (_context3.prev = _context3.next) {
                     case 0:
                         if (!(!force && this._processing)) {
-                            _context2.next = 2;
+                            _context3.next = 2;
                             break;
                         }
 
-                        return _context2.abrupt("return");
+                        return _context3.abrupt("return");
 
                     case 2:
                         if (this._commandQueue.length) {
-                            _context2.next = 5;
+                            _context3.next = 5;
                             break;
                         }
 
                         this._processing = false;
-                        return _context2.abrupt("return");
+                        return _context3.abrupt("return");
 
                     case 5:
 
                         this._processing = true;
 
                         element = this._commandQueue.shift();
-                        _context2.prev = 7;
-                        _context2.next = 10;
+                        _context3.prev = 7;
+                        _context3.next = 10;
                         return this.server.getCommandHandler(element.parsed.command)(this, element.parsed, element.data, function () {
                             if (!this._commandQueue.length) {
                                 this._processing = false;
@@ -1127,33 +1223,33 @@ IMAPConnection.prototype.processQueue = function () {
                         }.bind(this));
 
                     case 10:
-                        _context2.next = 16;
+                        _context3.next = 16;
                         break;
 
                     case 12:
-                        _context2.prev = 12;
-                        _context2.t0 = _context2["catch"](7);
+                        _context3.prev = 12;
+                        _context3.t0 = _context3["catch"](7);
 
-                        console.error("Error processing command:", _context2.t0, "\n", _context2.t0.stack);
+                        console.error("Error processing command:", _context3.t0, "\n", _context3.t0.stack);
                         this.send({
                             tag: element.parsed.tag,
                             command: "NO",
                             attributes: [{
                                 type: "TEXT",
-                                value: "Server error: " + _context2.t0 + ""
+                                value: "Server error: " + _context3.t0 + ""
                             }]
                         }, "SERVER ERROR", element.parsed, element.data);
 
                     case 16:
                     case "end":
-                        return _context2.stop();
+                        return _context3.stop();
                 }
             }
-        }, _callee2, this, [[7, 12]]);
+        }, _callee3, this, [[7, 12]]);
     }));
 
-    return function (_x2) {
-        return _ref2.apply(this, arguments);
+    return function (_x4) {
+        return _ref3.apply(this, arguments);
     };
 }();
 

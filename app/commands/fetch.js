@@ -154,9 +154,13 @@ module.exports = function () {
                             rangeMessage[1].flags.push("\\Seen");
                         }
 
+                        if (rangeMessage[1].file) {
+                            files.push(rangeMessage[1].file);
+                        }
+
                         i = 0, len = params.length;
 
-                    case 38:
+                    case 39:
                         if (!(i < len)) {
                             _context.next = 52;
                             break;
@@ -167,13 +171,13 @@ module.exports = function () {
                         handler = connection.server.fetchHandlers[key] || fetchHandlers[key];
 
                         if (handler) {
-                            _context.next = 43;
+                            _context.next = 44;
                             break;
                         }
 
                         throw new Error("Invalid FETCH argument " + (key ? " " + key : "#" + (i + 1)));
 
-                    case 43:
+                    case 44:
 
                         value = handler(connection, rangeMessage[1], params[i]);
 
@@ -184,11 +188,10 @@ module.exports = function () {
                         name.value = name.value.replace(/\.PEEK\b/i, "");
                         response.push(name);
                         response.push(value);
-                        files.push(rangeMessage[1].file);
 
                     case 49:
                         i++;
-                        _context.next = 38;
+                        _context.next = 39;
                         break;
 
                     case 52:

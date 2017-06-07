@@ -1,4 +1,4 @@
-var hoodiecrow = require("./app/server"),
+var hoodiecrow = require("../app/server"),
     server = hoodiecrow({
         plugins: ["ID", "STARTTLS" /*, "LOGINDISABLED"*/ , "SASL-IR", "AUTH-PLAIN", "ENABLE", "UNSELECT"],
         id: {
@@ -9,7 +9,11 @@ var hoodiecrow = require("./app/server"),
         storage: {
             "INBOX": {
                 messages: [{
-                    "file": "/home/anatoly/projects/hoodiecrow/complete.js"
+                    file: "./README.md"
+                }, {
+                    raw: 'asdasdasd21312ekdao;dkaspod \n\n 21p3ok123po12 \n'
+                }, {
+                    file: "./README.md"
                 }]
             }
         },
