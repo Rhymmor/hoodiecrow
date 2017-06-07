@@ -184,7 +184,9 @@ module.exports = function () {
                         name.value = name.value.replace(/\.PEEK\b/i, "");
                         response.push(name);
                         response.push(value);
-                        files.push(rangeMessage[1].file);
+                        if (rangeMessage[1].file) {
+                            files.push(rangeMessage[1].file);
+                        }
 
                     case 49:
                         i++;

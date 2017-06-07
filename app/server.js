@@ -951,6 +951,7 @@ IMAPConnection.prototype.send = function (response, description, parsed) {
         _arguments = arguments;
 
     return new Promise(function (resolve, reject) {
+        console.log('SEEEEENNNNDDD!!!!!');
         if (!_this.socket || _this.socket.destroyed) {
             resolve();
         }
@@ -972,7 +973,7 @@ IMAPConnection.prototype.send = function (response, description, parsed) {
             resolve();
         }
 
-        if (!response.files) {
+        if (!response.files || !response.files.length) {
             var compiled = imapHandler.compiler(response);
 
             if (_this.options.debug) {
@@ -985,15 +986,17 @@ IMAPConnection.prototype.send = function (response, description, parsed) {
             }
             reject();
         } else {
-            console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
             if (_this.socket && !_this.socket.destroyed) {
                 var rs = fs.createReadStream(response.files[0], 'utf8');
+                var data = '';
                 rs.on('data', function (chunk) {
-                    console.log(chunk);
-                    _this.socket.write(chunk);
+                    data += chunk;
                 });
                 rs.on('end', function () {
-                    return resolve();
+                    console.log('EEEENNNNDDD!!!!!');
+                    _this.socket.write(new Buffer(data + "\r\n"), "binary");
+                    resolve();
+                    rs.close();
                 });
                 //rs.pipe(process.stdout);
                 //rs.pipe(this.socket);
