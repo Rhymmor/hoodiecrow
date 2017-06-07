@@ -8,9 +8,8 @@ require("babel-core/register");
 require("babel-polyfill");
 "use strict";
 
-process.on('warning', function (e) {
-    return console.warn(e.stack);
-});
+//TODO: investigate warnings
+process.setMaxListeners(0);
 
 var Stream = require("stream").Stream;
 var util = require("util");
@@ -1003,93 +1002,91 @@ IMAPConnection.prototype.send = function (response, description, parsed) {
                                 console.log("SEND: %s", compiled);
                             }
 
-                            console.log(process.cwd());
-
                             if (!response.files) {
-                                _context.next = 42;
+                                _context.next = 41;
                                 break;
                             }
 
                             _iteratorNormalCompletion = true;
                             _didIteratorError = false;
                             _iteratorError = undefined;
-                            _context.prev = 12;
+                            _context.prev = 11;
                             _iterator = response.files[Symbol.iterator]();
 
-                        case 14:
+                        case 13:
                             if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                                _context.next = 28;
+                                _context.next = 27;
                                 break;
                             }
 
                             file = _step.value;
-                            _context.prev = 16;
-                            _context.next = 19;
+                            _context.prev = 15;
+                            _context.next = 18;
                             return readFile(file);
 
-                        case 19:
+                        case 18:
                             compiled += _context.sent;
-                            _context.next = 25;
+                            _context.next = 24;
                             break;
 
-                        case 22:
-                            _context.prev = 22;
-                            _context.t0 = _context["catch"](16);
+                        case 21:
+                            _context.prev = 21;
+                            _context.t0 = _context["catch"](15);
 
                             reject(_context.t0);
 
-                        case 25:
+                        case 24:
                             _iteratorNormalCompletion = true;
-                            _context.next = 14;
+                            _context.next = 13;
                             break;
 
-                        case 28:
-                            _context.next = 34;
+                        case 27:
+                            _context.next = 33;
                             break;
 
-                        case 30:
-                            _context.prev = 30;
-                            _context.t1 = _context["catch"](12);
+                        case 29:
+                            _context.prev = 29;
+                            _context.t1 = _context["catch"](11);
                             _didIteratorError = true;
                             _iteratorError = _context.t1;
 
-                        case 34:
+                        case 33:
+                            _context.prev = 33;
                             _context.prev = 34;
-                            _context.prev = 35;
 
                             if (!_iteratorNormalCompletion && _iterator.return) {
                                 _iterator.return();
                             }
 
-                        case 37:
-                            _context.prev = 37;
+                        case 36:
+                            _context.prev = 36;
 
                             if (!_didIteratorError) {
-                                _context.next = 40;
+                                _context.next = 39;
                                 break;
                             }
 
                             throw _iteratorError;
 
+                        case 39:
+                            return _context.finish(36);
+
                         case 40:
-                            return _context.finish(37);
+                            return _context.finish(33);
 
                         case 41:
-                            return _context.finish(34);
-
-                        case 42:
                             if (_this.socket && !_this.socket.destroyed) {
                                 _this.socket.write(new Buffer(compiled + "\r\n", "binary"));
                                 resolve();
                             }
                             reject();
 
-                        case 44:
+                        case 43:
                         case "end":
                             return _context.stop();
                     }
                 }
-            }, _callee, _this, [[12, 30, 34, 42], [16, 22], [35,, 37, 41]]);
+            }, _callee, _this, [[11, 29, 33, 41], [15, 21], [34,, 36, 40]]);
         }));
 
         return function (_x, _x2) {
