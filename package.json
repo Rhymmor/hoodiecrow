@@ -2,7 +2,7 @@
   "name": "hoodiecrow-imap",
   "version": "2.1.0",
   "description": "Scriptable IMAP mock server for testing purposes",
-  "main": "lib/server.js",
+  "main": "app/server.js",
   "scripts": {
     "test": "grunt",
     "build": "babel lib -d app",
@@ -11,9 +11,13 @@
   "bin": {
     "hoodiecrow": "./bin/hoodiecrow"
   },
-  "repository": "git@github.com:andris9/hoodiecrow.git",
+  "repository": { 
+    "type" : "git",
+    "url" : "https://github.com/Rhymmor/hoodiecrow.git"
+  },
   "keywords": [
-    "IMAP"
+    "IMAP",
+    "IMAP server"
   ],
   "dependencies": {
     "imap-handler": "~0.1.12",

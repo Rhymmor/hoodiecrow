@@ -9,9 +9,11 @@ var hoodiecrow = require("../app/server"),
         storage: {
             "INBOX": {
                 messages: [{
-                    "file": "/Users/anatoly.belonog/Documents/projects/hoodiecrow/examples/complete.js"
+                    file: "./README.md"
                 }, {
                     raw: 'asdasdasd21312ekdao;dkaspod \n\n 21p3ok123po12 \n'
+                }, {
+                    file: "./README.md"
                 }]
             }
         },
