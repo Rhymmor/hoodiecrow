@@ -5,8 +5,7 @@
   "main": "app/server.js",
   "scripts": {
     "test": "grunt",
-    "build": "babel lib -d app",
-    "example": "node examples/complete-file.js"
+    "build": "babel lib -d app"
   },
   "bin": {
     "hoodiecrow": "./bin/hoodiecrow"
@@ -24,10 +23,6 @@
     "babel-core": "^6.24.1",
     "imap-handler": "~0.1.12",
     "big.js": "~3.1.3"
-  },
-  "optionalDependencies": {
-    "optimist": "~0.6.1",
-    "simplesmtp": "~0.3.35"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
