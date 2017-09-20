@@ -7,9 +7,6 @@
     "test": "grunt",
     "build": "babel lib -d app"
   },
-  "bin": {
-    "hoodiecrow": "./bin/hoodiecrow"
-  },
   "repository": { 
     "type" : "git",
     "url" : "https://github.com/Rhymmor/hoodiecrow.git"
