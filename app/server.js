@@ -32,10 +32,13 @@ function IMAPServer(options) {
         cert: fs.readFileSync(__dirname + "/../cert/server.crt")
     };
 
+    var client = this.createClient.bind(this);
     if (this.options.secureConnection) {
-        this.server = tls.createServer(this.options.credentials, this.createClient.bind(this));
+        this.server = tls.createServer(this.options.credentials, client);
+        this.serverV6 = tls.createServer(this.options.credentials, client);
     } else {
-        this.server = net.createServer(this.createClient.bind(this));
+        this.server = net.createServer(client);
+        this.serverV6 = net.createServer(client);
     }
 
     this.connectionHandlers = [];
@@ -96,8 +99,14 @@ IMAPServer.prototype.listen = function () {
     this.server.listen.apply(this.server, args);
 };
 
+IMAPServer.prototype.listenV6 = function () {
+    var args = Array.prototype.slice.call(arguments);
+    this.serverV6.listen.apply(this.serverV6, args);
+};
+
 IMAPServer.prototype.close = function (callback) {
     this.server.close(callback);
+    this.serverV6.close(callback);
 };
 
 IMAPServer.prototype.createClient = function (socket) {
