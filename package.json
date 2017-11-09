@@ -5,7 +5,8 @@
   "main": "app/server.js",
   "scripts": {
     "test": "grunt",
-    "build": "babel lib -d app"
+    "build": "babel lib -d app",
+    "prepublish": "npm run build"
   },
   "repository": { 
     "type" : "git",
