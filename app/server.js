@@ -786,10 +786,12 @@ function IMAPConnection(server, socket) {
     this.socket.on("close", this.onClose.bind(this));
     this.socket.on("error", this.onError.bind(this));
 
-    this.directNotifications = false;
-    this._notificationCallback = this.onNotify.bind(this);
-    this.notificationQueue = [];
-    this.server.on("notify", this._notificationCallback);
+    if (this.server.notifiable) {
+        this.directNotifications = false;
+        this._notificationCallback = this.onNotify.bind(this);
+        this.notificationQueue = [];
+        this.server.on("notify", this._notificationCallback);
+    }
 
     this.socket.write("* OK Hoodiecrow ready for rumble\r\n");
 }
@@ -800,7 +802,9 @@ IMAPConnection.prototype.onClose = function () {
     try {
         this.socket.end();
     } catch (E) {}
-    this.server.removeListener("notify", this._notificationCallback);
+    if (this.server.notifiable) {
+        this.server.removeListener("notify", this._notificationCallback);
+    }
 };
 
 IMAPConnection.prototype.onError = function (err) {
@@ -986,7 +990,7 @@ IMAPConnection.prototype.send = function (response, description, parsed) {
                                 resolve();
                             }
 
-                            if (!response.notification && response.tag !== "*") {
+                            if (_this.server.notifiable && !response.notification && response.tag !== "*") {
                                 // arguments[2] should be the original command
                                 _this.processNotifications(parsed);
                             } else {
